@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Build output
+bin/
+obj/
+
+# Local data (SQLite)
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# IDE
+.vs/
+.idea/
+*.user
+
+# Local-only notes (not part of the project)
+PUSH_CLEAN_GUIDE.md
