@@ -30,8 +30,15 @@ namespace SaoKeBot.Services.Repositories
                     note TEXT,
                     category TEXT,
                     type TEXT,
+                    person TEXT,
                     date DATETIME
                 );");
+
+            // Migrate older databases that predate the "person" column.
+            var columns = conn.Query<string>("SELECT name FROM pragma_table_info('transactions');");
+            if (!columns.Contains("person"))
+                conn.Execute("ALTER TABLE transactions ADD COLUMN person TEXT;");
+
             return Task.CompletedTask;
         }
 
@@ -39,8 +46,8 @@ namespace SaoKeBot.Services.Repositories
         {
             using var conn = new SqliteConnection(_connectionString);
             await conn.ExecuteAsync(
-                "INSERT INTO transactions (user_id, amount, note, category, type, date) VALUES (@UserId, @Amount, @Note, @Category, @Type, @Date)",
-                new { UserId = userId, result.Amount, result.Note, result.Category, result.Type, Date = DateTime.Now });
+                "INSERT INTO transactions (user_id, amount, note, category, type, person, date) VALUES (@UserId, @Amount, @Note, @Category, @Type, @Person, @Date)",
+                new { UserId = userId, result.Amount, result.Note, result.Category, result.Type, result.Person, Date = DateTime.Now });
         }
 
         public async Task<Transaction?> UndoLastAsync(long userId)

@@ -92,7 +92,13 @@ namespace SaoKeBot.Services
             if (cmd == "/start" || cmd == "/help" || cmd == "help")
             {
                 await bot.SendTextMessageAsync(chatId,
-                    "Syntax: [Item] [Amount] (e.g., Breakfast 30k)\nCommands: /dashboard, undo");
+                    "Expense/Income: [Item] [Amount]  (e.g., Breakfast 30k)\n\n" +
+                    "Loans & debts (tracked per person):\n" +
+                    "  lend [name] [amount]     - you lent to someone\n" +
+                    "  getback [name] [amount]  - they repaid you\n" +
+                    "  borrow [name] [amount]   - you borrowed from someone\n" +
+                    "  payback [name] [amount]  - you repaid them\n\n" +
+                    "Other commands: /dashboard, undo");
                 return true;
             }
 

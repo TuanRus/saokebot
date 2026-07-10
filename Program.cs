@@ -43,6 +43,8 @@ builder.Services.AddSingleton<IFeatureHandler, ExpenseFeature>();
 builder.Services.AddSingleton<IFeatureHandler, IncomeFeature>();
 builder.Services.AddSingleton<IFeatureHandler, DebtFeature>();
 builder.Services.AddSingleton<IFeatureHandler, LoanFeature>();
+builder.Services.AddSingleton<IFeatureHandler, GetbackFeature>();
+builder.Services.AddSingleton<IFeatureHandler, PaybackFeature>();
 
 var app = builder.Build();
 

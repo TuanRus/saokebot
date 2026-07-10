@@ -93,6 +93,23 @@ and `/dashboard`.
 | `/request`          | (Non-whitelisted users) asks admins for access     |
 | `/help`             | Shows the syntax and available commands            |
 
+### Loans & debts (tracked per person)
+
+These four commands follow the form `command <name> <amount>` and keep a running balance
+per counterparty. Settling a loan/debt reduces that person's outstanding balance **without
+changing your total balance** (a receivable/liability simply turns back into cash).
+
+| You send             | Result                                                    |
+| -------------------- | --------------------------------------------------------- |
+| `lend Long 500k`     | You lent 500,000 to Long (Long now owes you 500,000)      |
+| `getback Long 200k`  | Long repaid you 200,000 (Long now owes you 300,000)       |
+| `borrow Hoa 1m`      | You borrowed 1,000,000 from Hoa (you owe Hoa 1,000,000)   |
+| `payback Hoa 400k`   | You repaid Hoa 400,000 (you now owe Hoa 600,000)          |
+
+Both **partial** and **full** settlements are supported — send the exact remaining amount
+to bring a balance to zero. The name may contain spaces (e.g., `lend Anh Long 500k`). The
+dashboard shows a per-person breakdown of who owes you and whom you owe.
+
 ## Categories & keywords
 
 Transactions are categorized by matching keywords against your message. The keyword lists

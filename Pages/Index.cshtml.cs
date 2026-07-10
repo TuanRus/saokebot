@@ -29,8 +29,12 @@ namespace SaoKeBot.Pages
         public double TotalIncome { get; private set; }
         public double TotalExpense { get; private set; }
         public double TotalBalance { get; private set; } // All-time balance.
-        public double TotalDebt { get; private set; }    // Total I owe others.
-        public double TotalLoan { get; private set; }    // Total others owe me.
+        public double TotalDebt { get; private set; }    // Outstanding: total I still owe others.
+        public double TotalLoan { get; private set; }    // Outstanding: total others still owe me.
+
+        // Outstanding amount per counterparty (only non-zero balances are listed).
+        public List<(string Person, double Amount)> LoanByPerson { get; private set; } = new();
+        public List<(string Person, double Amount)> DebtByPerson { get; private set; } = new();
 
         public string ChartLabelsJson { get; private set; } = "[]";
         public string ChartDataJson { get; private set; } = "[]";
@@ -58,15 +62,43 @@ namespace SaoKeBot.Pages
             // Fetch all data to calculate the true accumulated balance.
             var allTransactions = await _repo.GetAllAsync(Uid.Value);
 
-            // Outstanding debt/loan (all-time cumulative).
-            TotalDebt = allTransactions.Where(t => t.Type == "DEBT").Sum(t => t.Amount);
-            TotalLoan = allTransactions.Where(t => t.Type == "LOAN").Sum(t => t.Amount);
+            // Gross lending/borrowing (before settlements).
+            double loanGross = allTransactions.Where(t => t.Type == "LOAN").Sum(t => t.Amount);
+            double loanRepaid = allTransactions.Where(t => t.Type == "LOAN_REPAY").Sum(t => t.Amount);
+            double debtGross = allTransactions.Where(t => t.Type == "DEBT").Sum(t => t.Amount);
+            double debtRepaid = allTransactions.Where(t => t.Type == "DEBT_REPAY").Sum(t => t.Amount);
 
-            // Net balance = Income - Expense - (I owe) + (owed to me).
+            // Outstanding = gross minus what has been settled.
+            TotalLoan = loanGross - loanRepaid;
+            TotalDebt = debtGross - debtRepaid;
+
+            // Per-person outstanding balances (hide anyone who is fully settled).
+            LoanByPerson = allTransactions
+                .Where(t => t.Type == "LOAN" || t.Type == "LOAN_REPAY")
+                .GroupBy(t => string.IsNullOrEmpty(t.Person) ? "Unknown" : t.Person)
+                .Select(g => (Person: g.Key,
+                              Amount: g.Where(t => t.Type == "LOAN").Sum(t => t.Amount)
+                                    - g.Where(t => t.Type == "LOAN_REPAY").Sum(t => t.Amount)))
+                .Where(x => Math.Abs(x.Amount) > 0.0001)
+                .OrderByDescending(x => x.Amount)
+                .ToList();
+
+            DebtByPerson = allTransactions
+                .Where(t => t.Type == "DEBT" || t.Type == "DEBT_REPAY")
+                .GroupBy(t => string.IsNullOrEmpty(t.Person) ? "Unknown" : t.Person)
+                .Select(g => (Person: g.Key,
+                              Amount: g.Where(t => t.Type == "DEBT").Sum(t => t.Amount)
+                                    - g.Where(t => t.Type == "DEBT_REPAY").Sum(t => t.Amount)))
+                .Where(x => Math.Abs(x.Amount) > 0.0001)
+                .OrderByDescending(x => x.Amount)
+                .ToList();
+
+            // Net balance = Income - Expense - (I owe, gross) + (owed to me, gross).
+            // Settlements convert a receivable/liability into cash, so they leave the total unchanged.
             TotalBalance = allTransactions.Where(t => t.Type == "IN").Sum(t => t.Amount)
                          - allTransactions.Where(t => t.Type == "OUT").Sum(t => t.Amount)
-                         - TotalDebt
-                         + TotalLoan;
+                         - debtGross
+                         + loanGross;
 
             // Filter data for the CURRENT month to display on the Dashboard.
             string currentMonth = DateTime.Now.ToString("yyyy-MM");

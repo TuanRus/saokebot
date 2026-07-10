@@ -162,8 +162,8 @@ else
                                 {
                                     @foreach (var item in Model.Transactions)
                                     {
-                                        var color = item.Type switch { "IN" => "text-success", "OUT" => "text-danger", "LOAN" => "text-info", "DEBT" => "text-warning", _ => "text-secondary" };
-                                        var sign = item.Type switch { "IN" or "LOAN" => "+", "OUT" or "DEBT" => "-", _ => "" };
+                                        var color = item.Type switch { "IN" or "LOAN_REPAY" => "text-success", "OUT" or "DEBT_REPAY" => "text-danger", "LOAN" => "text-info", "DEBT" => "text-warning", _ => "text-secondary" };
+                                        var sign = item.Type switch { "IN" or "LOAN" or "LOAN_REPAY" => "+", "OUT" or "DEBT" or "DEBT_REPAY" => "-", _ => "" };
                                         <tr>
                                             <td class="small text-muted">@item.Date.ToString("dd/MM HH:mm")</td>
                                             <td>@item.Note</td>

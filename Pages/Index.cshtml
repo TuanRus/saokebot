@@ -78,7 +78,7 @@ else
             <div class="col-md-6">
                 <div class="card stat-card bg-warning text-dark">
                     <div class="card-body">
-                        <small>I Owe (payable)</small>
+                        <small>Outstanding I Owe</small>
                         <h3 class="fw-bold">@Model.TotalDebt.ToString("N0")</h3>
                     </div>
                 </div>
@@ -86,12 +86,64 @@ else
             <div class="col-md-6">
                 <div class="card stat-card bg-info text-white">
                     <div class="card-body">
-                        <small>Lent Out (owed to me)</small>
+                        <small>Outstanding Lent Out</small>
                         <h3 class="fw-bold">@Model.TotalLoan.ToString("N0")</h3>
                     </div>
                 </div>
             </div>
         </div>
+
+        @if (Model.LoanByPerson.Any() || Model.DebtByPerson.Any())
+        {
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card stat-card h-100">
+                        <div class="card-header bg-white fw-bold border-0">
+                            <i class="fa-solid fa-hand-holding-dollar me-2 text-info"></i>Who Owes Me
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            @if (!Model.LoanByPerson.Any())
+                            {
+                                <li class="list-group-item text-muted small">No outstanding loans.</li>
+                            }
+                            else
+                            {
+                                @foreach (var p in Model.LoanByPerson)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@p.Person</span>
+                                        <span class="fw-bold text-info">@p.Amount.ToString("N0")</span>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card stat-card h-100">
+                        <div class="card-header bg-white fw-bold border-0">
+                            <i class="fa-solid fa-money-bill-transfer me-2 text-warning"></i>I Owe
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            @if (!Model.DebtByPerson.Any())
+                            {
+                                <li class="list-group-item text-muted small">No outstanding debts.</li>
+                            }
+                            else
+                            {
+                                @foreach (var p in Model.DebtByPerson)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>@p.Person</span>
+                                        <span class="fw-bold text-warning">@p.Amount.ToString("N0")</span>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
 
         <div class="row">
             <div class="col-md-5 mb-4">
@@ -124,8 +176,8 @@ else
                                 {
                                     @foreach (var item in Model.CurrentMonthTransactions.Take(15))
                                     {
-                                        var color = item.Type switch { "IN" => "text-success", "OUT" => "text-danger", "LOAN" => "text-info", "DEBT" => "text-warning", _ => "text-secondary" };
-                                        var sign = item.Type switch { "IN" or "LOAN" => "+", "OUT" or "DEBT" => "-", _ => "" };
+                                        var color = item.Type switch { "IN" or "LOAN_REPAY" => "text-success", "OUT" or "DEBT_REPAY" => "text-danger", "LOAN" => "text-info", "DEBT" => "text-warning", _ => "text-secondary" };
+                                        var sign = item.Type switch { "IN" or "LOAN" or "LOAN_REPAY" => "+", "OUT" or "DEBT" or "DEBT_REPAY" => "-", _ => "" };
                                         <tr>
                                             <td class="small text-muted">@item.Date.ToString("dd/MM HH:mm")</td>
                                             <td>@item.Note</td>

@@ -19,7 +19,11 @@ namespace SaoKeBot.Models
         public double Amount { get; set; }
         public string Note { get; set; } = "";
         public string Category { get; set; } = "";
-        public string Type { get; set; } = ""; // IN (income), OUT (expense), DEBT, LOAN
+        // IN (income), OUT (expense), DEBT (I owe), LOAN (I lent),
+        // DEBT_REPAY (I paid back a debt), LOAN_REPAY (someone repaid me)
+        public string Type { get; set; } = "";
+        // Counterparty name for loan/debt transactions (empty for income/expense).
+        public string Person { get; set; } = "";
         public DateTime Date { get; set; }
     }
 
@@ -30,15 +34,18 @@ namespace SaoKeBot.Models
         public string Note { get; set; } = "";
         public string Category { get; set; } = "";
         public string Type { get; set; } = "";
+        // Counterparty name for loan/debt commands.
+        public string Person { get; set; } = "";
 
         public DateTime Date { get; set; }
 
-        public ParseResult(double amount, string note, string category, string type)
+        public ParseResult(double amount, string note, string category, string type, string person = "")
         {
             Amount = amount;
             Note = note;
             Category = category;
             Type = type;
+            Person = person;
             Date = DateTime.Now;
         }
     }

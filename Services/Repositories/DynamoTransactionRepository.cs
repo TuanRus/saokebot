@@ -74,6 +74,7 @@ namespace SaoKeBot.Services.Repositories
                     ["note"] = new() { S = result.Note ?? "" },
                     ["category"] = new() { S = result.Category ?? "" },
                     ["type"] = new() { S = result.Type ?? "" },
+                    ["person"] = new() { S = result.Person ?? "" },
                     ["date"] = new() { S = now.ToString(DateFmt, CultureInfo.InvariantCulture) }
                 }
             });
@@ -165,6 +166,7 @@ namespace SaoKeBot.Services.Repositories
                 Note = GetS(i, "note"),
                 Category = GetS(i, "category"),
                 Type = GetS(i, "type"),
+                Person = GetS(i, "person"),
                 Date = DateTime.TryParse(GetS(i, "date"), CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : DateTime.MinValue
             };
         }
